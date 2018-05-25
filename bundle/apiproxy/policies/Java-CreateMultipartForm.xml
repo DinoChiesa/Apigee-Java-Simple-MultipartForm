@@ -1,0 +1,9 @@
+<JavaCallout name='Java-CreateMultipartForm'>
+  <Properties>
+    <Property name="contentVar">base64EncodedImageData</Property>
+    <Property name="contentType">image/png</Property>
+    <Property name="part-name">image</Property>
+  </Properties>
+  <ClassName>com.google.apigee.edgecallouts.MultipartFormCallout</ClassName>
+  <ResourceURL>java://edge-custom-multipart-form-1.0.1.jar</ResourceURL>
+</JavaCallout>
