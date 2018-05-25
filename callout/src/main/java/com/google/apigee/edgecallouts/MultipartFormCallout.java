@@ -39,18 +39,22 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class MultipartFormCallout implements Execution {
     private final static String varprefix= "mpf_";
-    private final static byte[] linebreak = "\n".getBytes(StandardCharsets.UTF_8);
     private Map properties; // read-only
     private static final String variableReferencePatternString = "(.*?)\\{([^\\{\\} ]+?)\\}(.*?)";
     private static final Pattern variableReferencePattern = Pattern.compile(variableReferencePatternString);
     private final static boolean wantStringDefault = true;
-    private enum Base64Action { Encode, Decode }
 
     public MultipartFormCallout (Map properties) {
         this.properties = properties;
     }
 
     private static String varName(String s) { return varprefix + s;}
+
+    private String getDestination(MessageContext msgCtxt) throws Exception {
+        String destination = getSimpleOptionalProperty("destination", msgCtxt);
+        if (destination == null) { destination = "message"; }
+        return destination;
+    }
 
     private String getPartContentVar(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("contentVar", msgCtxt);
@@ -59,10 +63,6 @@ public class MultipartFormCallout implements Execution {
     private String getPartContentType(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("contentType", msgCtxt);
     }
-    
-    // private String getPartFilename(MessageContext msgCtxt) throws Exception {
-    //     return getSimpleRequiredProperty("part-filename", msgCtxt);
-    // }
     
     private String getPartName(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("part-name", msgCtxt);
@@ -122,8 +122,12 @@ public class MultipartFormCallout implements Execution {
             byte[] decodedBytes = IOUtils.toByteArray(decodingStream);
             msgCtxt.setVariable(varName("decoded_length"), decodedBytes.length);
             String boundary = RandomStringUtils.randomAlphanumeric(10);
-            msgCtxt.setVariable(varName("boundary"), boundary);
-            msgCtxt.setVariable("message.header.content-type", "multipart/form-data;boundary=" + boundary);
+            String destination = getDestination(msgCtxt);
+            Message message = (Message) msgCtxt.getVariable(destination);
+            if (message == null) {
+                throw new IllegalStateException("message " + destination + " does not exist.");
+            }
+            msgCtxt.setVariable(destination + ".header.content-type", "multipart/form-data;boundary=" + boundary);
             Part filepart = Part.create( getPartName(msgCtxt),
                                          new ByteArrayPayload((byte[])decodedBytes), 
                                          new Part.PartOptions().contentType( getPartContentType(msgCtxt) ));
@@ -131,7 +135,7 @@ public class MultipartFormCallout implements Execution {
             MultipartForm mpf = new MultipartForm(boundary, new Part[] {filepart});
             byte[] payload = IOUtils.toByteArray( mpf.openStream() );
             msgCtxt.setVariable(varName("payload_length"), payload.length);
-            msgCtxt.getMessage().setContent(new ByteArrayInputStream(payload));
+            message.setContent(new ByteArrayInputStream(payload));
             
             //msgCtxt.setVariable(getOutputVar(msgCtxt), payload);
             return ExecutionResult.SUCCESS;

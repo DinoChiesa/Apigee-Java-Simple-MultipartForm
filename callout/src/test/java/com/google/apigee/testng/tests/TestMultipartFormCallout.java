@@ -71,13 +71,8 @@ public class TestMultipartFormCallout {
                 if (variables == null) {
                     variables = new HashMap();
                 }
-                if (name.equals("message.content")) {
-                    try {
-                        return (T) IOUtils.toByteArray(messageContentStream);
-                    }
-                    catch(IOException ioexc1) {
-                        return (T) null;
-                    }
+                if (name.equals("message")) {
+                    return (T) message;
                 }
                 return (T) variables.get(name);
             }

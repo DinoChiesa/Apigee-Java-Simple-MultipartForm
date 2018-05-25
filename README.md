@@ -5,6 +5,9 @@ creates a multipart form payload, from a single blob that is a base64-encoded st
 
 For base64-decoding, it uses the [Base64InputStream](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64InputStream.html) from Apache commons-codec.
 
+For creating the multipart form, it relies on code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
+
+
 ## Disclaimer
 
 This example is not an official Google product, nor is it part of an official Google product.
@@ -51,13 +54,12 @@ There is one callout class, com.google.apigee.edgecallouts.MultipartFormCallout
 
 It accepts several data items as input
 
-| property name      | description                      |
-| ------------------ | -------------------------------- |
-| **contentVar**     | name of a variable containing a string which represents a base64-encoded byte array |
-| **contentType**    | a string, something like image/jpeg or image/png etc |
-| **part-name**      | a string, the name of the part within the form |
-
-All of these items are mandatory.
+| property name   | status   | description                                                                |
+| ----------------| -------- | -------------------------------------------------------------------------- |
+| **contentVar**  | required | name of a variable containing a string which represents a base64-encoded byte array |
+| **contentType** | required | a string, something like image/jpeg or image/png etc                       |
+| **part-name**   | required | a string, the name of the part within the form                             |
+| **destination** | optional | a string, the name of an existing message. Defaults to 'request'.          |
 
 This callout operates on the message content.
 If you place it in the request flow, it will operate on the request content.
