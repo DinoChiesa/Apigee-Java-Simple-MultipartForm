@@ -17,7 +17,7 @@ All you need is the built JAR, and the appropriate configuration for the policy.
 If you want to build it, feel free.  The instructions are at the bottom of this readme.
 
 
-1. copy the jar file, available in  target/edge-custom-base64.jar , if you have built the jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-base64.jar) if you have not, to your apiproxy/resources/java directory. You can do this offline, or using the graphical Proxy Editor in the Apigee Edge Admin Portal.
+1. copy the jar file, available in  target/edge-custom-multipart-form-1.0.1.jar , if you have built the jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-multipart-form-1.0.1.jar) if you have not, to your apiproxy/resources/java directory. You can do this offline, or using the graphical Proxy Editor in the Apigee Edge Admin Portal.
 
 2. include an XML file for the Java callout policy in your
    apiproxy/resources/policies directory. It should look
@@ -81,6 +81,9 @@ An example for encoding:
 </JavaCallout>
 ```
 
+The variable named in contentVar must hold a string in base64-encoded format.
+How you get the string there, is up to you.
+
 The result will be a form, that looks like so:
 
 ```
@@ -105,7 +108,11 @@ Invoke it like this:
   curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
 ```
 
-This will create a form and send it to a backend system.
+Internally, the example proxy assigns a static, fixed string value to a variable, and uses THAT as the contentVar for the policy.
+It then invokes the policy, which creates the form payload.
+The proxy then sends the form to a backend system.
+
+NB: The backend system as of this moment does not correctly handle the form.  This is because the backend doesn't handle forms; it's not because the form is invalid.
 
 
 ## Building
@@ -126,13 +133,16 @@ Building from source requires Java 1.8, and Maven.
   This will build the jar and also run all the tests, and copy the jar to the resource directory in the sample apiproxy bundle.
 
 
-## Build Dependencies
+## Runtime Dependencies
+
+All of these are runtime dependencies. These JARs must be available in the proxy or organization into which you deploy.
 
 - Apigee Edge expressions v1.0
 - Apigee Edge message-flow v1.0
-- Apache commons IO
-- Apache commons Codec
-
+- Apache commons IO 2.3
+- Apache commons Codec 1.11
+- Apache commons lang3 3.7
+- Google Guava 24.1
 
 ## License
 
@@ -141,4 +151,4 @@ and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java 
 
 ## Bugs
 
-* The tests are incomplete. 
+* The tests are incomplete.
