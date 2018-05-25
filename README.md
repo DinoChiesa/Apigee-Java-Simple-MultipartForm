@@ -102,6 +102,8 @@ IHDREXtSoftwareAdobe ImageReadyqe<:GIDATxZr@F8Kuzko-'[$\@...more image data here
 You can find an example proxy bundle that uses the policy, [here in this repo](bundle/apiproxy).
 The example proxy accepts a post.
 
+You must deploy the proxy in order to invoke it.
+
 Invoke it like this:
 
 ```
