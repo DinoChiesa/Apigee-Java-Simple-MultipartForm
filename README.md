@@ -150,7 +150,7 @@ All of these are runtime dependencies. These JARs must be available in the proxy
 
 ## License
 
-This material is Copyright 2018 Google Inc.
+This material is Copyright 2018 Google LLC.
 and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java code as well as the API Proxy configuration.
 
 ## Bugs
