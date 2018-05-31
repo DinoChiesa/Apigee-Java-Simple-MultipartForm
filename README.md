@@ -144,7 +144,7 @@ All of these are runtime dependencies. These JARs must be available in the proxy
 - Apigee Edge expressions v1.0
 - Apigee Edge message-flow v1.0
 - Apache commons IO 2.3
-- Apache commons Codec 1.11
+- Apache commons codec 1.11
 - Apache commons lang3 3.7
 - Google Guava 24.1
 

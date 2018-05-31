@@ -1,6 +1,6 @@
 // MultipartFormCallout.java
 //
-// Copyright (c) 2018 Google Inc.
+// Copyright (c) 2018 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,18 +37,15 @@ import org.jclouds.io.payloads.ByteArrayPayload;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public class MultipartFormCallout implements Execution {
+public class MultipartFormCallout extends CalloutBase implements Execution {
     private final static String varprefix= "mpf_";
-    private Map properties; // read-only
-    private static final String variableReferencePatternString = "(.*?)\\{([^\\{\\} ]+?)\\}(.*?)";
-    private static final Pattern variableReferencePattern = Pattern.compile(variableReferencePatternString);
     private final static boolean wantStringDefault = true;
 
     public MultipartFormCallout (Map properties) {
-        this.properties = properties;
+        super(properties);
     }
 
-    private static String varName(String s) { return varprefix + s;}
+    public String getVarnamePrefix() { return varprefix; }
 
     private String getDestination(MessageContext msgCtxt) throws Exception {
         String destination = getSimpleOptionalProperty("destination", msgCtxt);
@@ -59,58 +56,13 @@ public class MultipartFormCallout implements Execution {
     private String getPartContentVar(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("contentVar", msgCtxt);
     }
-    
+
     private String getPartContentType(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("contentType", msgCtxt);
     }
-    
+
     private String getPartName(MessageContext msgCtxt) throws Exception {
         return getSimpleRequiredProperty("part-name", msgCtxt);
-    }
-
-    private String getSimpleRequiredProperty(String propName, MessageContext msgCtxt) throws Exception {
-        String value = (String) this.properties.get(propName);
-        if (value == null) {
-            throw new IllegalStateException(propName + " resolves to an empty string.");
-        }
-        value = value.trim();
-        if (value.equals("")) {
-            throw new IllegalStateException(propName + " resolves to an empty string.");
-        }
-        value = resolvePropertyValue(value, msgCtxt);
-        if (value == null || value.equals("")) {
-            throw new IllegalStateException(propName + " resolves to an empty string.");
-        }
-        return value;
-    }
-
-    private String getSimpleOptionalProperty(String propName, MessageContext msgCtxt) throws Exception {
-        String value = (String) this.properties.get(propName);
-        if (value == null) { return null; }
-        value = value.trim();
-        if (value.equals("")) { return null; }
-        value = resolvePropertyValue(value, msgCtxt);
-        if (value == null || value.equals("")) { return null; }
-        return value;
-    }
-
-    // If the value of a property contains a pair of curlies,
-    // eg, {apiproxy.name}, then "resolve" the value by de-referencing
-    // the context variable whose name appears between the curlies.
-    private String resolvePropertyValue(String spec, MessageContext msgCtxt) {
-        Matcher matcher = variableReferencePattern.matcher(spec);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            matcher.appendReplacement(sb, "");
-            sb.append(matcher.group(1));
-            Object v = msgCtxt.getVariable(matcher.group(2));
-            if (v != null){
-                sb.append((String) v );
-            }
-            sb.append(matcher.group(3));
-        }
-        matcher.appendTail(sb);
-        return sb.toString();
     }
 
     public ExecutionResult execute (final MessageContext msgCtxt, final ExecutionContext execContext) {
@@ -129,14 +81,14 @@ public class MultipartFormCallout implements Execution {
             }
             msgCtxt.setVariable(destination + ".header.content-type", "multipart/form-data;boundary=" + boundary);
             Part filepart = Part.create( getPartName(msgCtxt),
-                                         new ByteArrayPayload((byte[])decodedBytes), 
+                                         new ByteArrayPayload((byte[])decodedBytes),
                                          new Part.PartOptions().contentType( getPartContentType(msgCtxt) ));
-            
+
             MultipartForm mpf = new MultipartForm(boundary, new Part[] {filepart});
             byte[] payload = IOUtils.toByteArray( mpf.openStream() );
             msgCtxt.setVariable(varName("payload_length"), payload.length);
             message.setContent(new ByteArrayInputStream(payload));
-            
+
             //msgCtxt.setVariable(getOutputVar(msgCtxt), payload);
             return ExecutionResult.SUCCESS;
         }
