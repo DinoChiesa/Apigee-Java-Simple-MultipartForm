@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.apigee.callout</groupId>
   <artifactId>edge-custom-multipart-form</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>EdgeCustomMultipartForm</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -35,7 +35,21 @@
       <scope>compile</scope>
     </dependency>
 
-    <!--
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>javax.servlet-api</artifactId>
+    <version>3.1.0</version>
+    <scope>provided</scope>
+</dependency>
+
+<dependency>
+    <groupId>commons-fileupload</groupId>
+    <artifactId>commons-fileupload</artifactId>
+    <version>1.3.3</version>
+</dependency>
+
+
+<!--
 
 The following 2 jar dependencies from Apigee are not avaiable in any
 public repo. You can install them in your machine-local repo (The .m2
@@ -67,6 +81,7 @@ mvn install:install-file \
       <artifactId>message-flow</artifactId>
       <version>1.0.0</version>
     </dependency>
+
     <dependency>
       <groupId>com.apigee.edge</groupId>
       <artifactId>expressions</artifactId>
@@ -87,7 +102,6 @@ mvn install:install-file \
       <scope>test</scope>
     </dependency>
 
-
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -107,7 +121,6 @@ mvn install:install-file \
       <artifactId>guava</artifactId>
       <version>24.1-jre</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -179,10 +192,11 @@ mvn install:install-file \
 
                     <include name="lib/commons-codec-1.11.jar"/>
                     <include name="lib/commons-io-2.3.jar"/>
+                    <include name="lib/commons-fileupload-1.3.3.jar"/>
                     <include name="lib/commons-lang-3.7.jar"/>
-
                     <include name="lib/error_prone_annotations-2.1.3.jar"/>
                     <include name="lib/guava-24.1-jre.jar"/>
+
 
                     <!--                    -->
 

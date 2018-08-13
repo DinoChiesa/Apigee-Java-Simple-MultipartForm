@@ -1,0 +1,10 @@
+<JavaCallout name='Java-CreateMultipartForm-2'>
+  <Properties>
+    <Property name="contentVar">textFileData</Property>
+    <Property name="contentType">text/plain</Property>
+    <Property name="part-name">hello.txt</Property>
+    <Property name="destination">contrivedMessage</Property>
+  </Properties>
+  <ClassName>com.google.apigee.edgecallouts.MultipartFormCreator</ClassName>
+  <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
+</JavaCallout>

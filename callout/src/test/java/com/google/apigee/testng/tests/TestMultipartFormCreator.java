@@ -22,7 +22,7 @@ import com.apigee.flow.message.Message;
 import com.apigee.flow.message.MessageContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.apigee.edgecallouts.MultipartFormCallout;
+import com.google.apigee.edgecallouts.MultipartFormCreator;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +49,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class TestMultipartFormCallout {
+public class TestMultipartFormCreator {
     private final static String testDataDir = "src/test/resources/test-data";
 
     MessageContext msgCtxt;
@@ -120,14 +120,17 @@ public class TestMultipartFormCallout {
             }
             @Mock()
             public void setContent(InputStream is) {
+                //System.out.printf("\n** setContent(Stream)\n");
                 messageContentStream = is;
             }
             @Mock()
             public void setContent(String content) {
+                //System.out.printf("\n** setContent(String)\n");
                 messageContentStream = new ByteArrayInputStream( content.getBytes( StandardCharsets.UTF_8 ) );
             }
             @Mock()
             public String getContent() {
+                //System.out.printf("\n** getContent()\n");
                 try {
                     StringWriter writer = new StringWriter();
                     IOUtils.copy(messageContentStream, writer, StandardCharsets.UTF_8);
@@ -144,7 +147,7 @@ public class TestMultipartFormCallout {
     @Test
     public void test_MessageCreation() throws Exception {
         String filename = "Logs_512px.png.b64";
-        String outputVar = "output_payload";
+        //String outputVar = "output_payload";
         Path path = Paths.get(testDataDir, filename);
         if (!Files.exists(path)) {
             throw new IOException("file(" + path.toString() + ") not found");
@@ -155,25 +158,73 @@ public class TestMultipartFormCallout {
 
         Properties props = new Properties();
         props.put("contentVar", "base64EncodedImageData");
+        props.put("want-decode", "true");
         props.put("contentType", "image/png");
         props.put("part-name", "image");
-        props.put("outputVar", outputVar);
+        // props.put("outputVar", outputVar);
 
-        MultipartFormCallout callout = new MultipartFormCallout(props);
+        MultipartFormCreator callout = new MultipartFormCreator(props);
 
         // execute and retrieve output
         ExecutionResult actualResult = callout.execute(msgCtxt, exeCtxt);
         ExecutionResult expectedResult = ExecutionResult.SUCCESS;
+        Assert.assertEquals(actualResult, expectedResult, "ExecutionResult");
 
         // check result and output
-        // Object output = msgCtxt.getVariable("request.content");
-        // Assert.assertNotNull(output, "no output");
         Object error = msgCtxt.getVariable("mpf_error");
         Assert.assertNull(error, "error");
+
         Object stacktrace = msgCtxt.getVariable("mpf_stacktrace");
         Assert.assertNull(stacktrace, "stacktrace");
-        Assert.assertEquals(actualResult, expectedResult, "result not as expected");
+
+        // cannot directly reference message.content with the mocked MessageContext
+        //Object output = msgCtxt.getVariable("message.content");
+        Message msg = msgCtxt.getMessage();
+        Object output = msg.getContent();
+        Assert.assertNotNull(output, "no output");
     }
+
+    // It is not practical to test the "destination does not exist" case without
+    // a full Apigee Edge runtime. Need ClientConnection.
+    //
+    // @Test
+    // public void test_DestinationMessageDoesNotExist() throws Exception {
+    //     String filename = "Logs_512px.png.b64";
+    //     String destinationVariable = "foo";
+    //     //String outputVar = "output_payload";
+    //     Path path = Paths.get(testDataDir, filename);
+    //     if (!Files.exists(path)) {
+    //         throw new IOException("file(" + path.toString() + ") not found");
+    //     }
+    //     InputStream imageInputStream = Files.newInputStream(path);
+    //     byte[] imageBytes = IOUtils.toByteArray(imageInputStream);
+    //     msgCtxt.setVariable("base64EncodedImageData", new String(imageBytes, StandardCharsets.UTF_8));
+    //
+    //     Properties props = new Properties();
+    //     props.put("contentVar", "base64EncodedImageData");
+    //     props.put("contentType", "image/png");
+    //     props.put("destination", destinationVariable);
+    //     props.put("part-name", "image");
+    //     // props.put("outputVar", outputVar);
+    //
+    //     MultipartFormCreator callout = new MultipartFormCreator(props);
+    //
+    //     // execute and retrieve output
+    //     ExecutionResult actualResult = callout.execute(msgCtxt, exeCtxt);
+    //     ExecutionResult expectedResult = ExecutionResult.SUCCESS;
+    //     Assert.assertEquals(actualResult, expectedResult, "ExecutionResult");
+    //
+    //     // check result and output
+    //     Object error = msgCtxt.getVariable("mpf_error");
+    //     Assert.assertNull(error, "error");
+    //
+    //     Object stacktrace = msgCtxt.getVariable("mpf_stacktrace");
+    //     Assert.assertNull(stacktrace, "stacktrace");
+    //
+    //     Message msg = msgCtxt.getVariable(destinationVariable);
+    //     String resultContent = msg.getContent();
+    //     Assert.assertNotNull(resultContent, "resultContent");
+    // }
 
 
     // @Test

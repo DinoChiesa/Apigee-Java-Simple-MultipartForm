@@ -1,4 +1,4 @@
-// MultipartFormCallout.java
+// MultipartFormCreator.java
 //
 // Copyright (c) 2018 Google LLC.
 //
@@ -37,16 +37,22 @@ import org.jclouds.io.payloads.ByteArrayPayload;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-public class MultipartFormCallout extends CalloutBase implements Execution {
+public class MultipartFormCreator extends CalloutBase implements Execution {
     private final static String varprefix= "mpf_";
     private final static boolean wantStringDefault = true;
 
-    public MultipartFormCallout (Map properties) {
+    public MultipartFormCreator (Map properties) {
         super(properties);
     }
 
     public String getVarnamePrefix() { return varprefix; }
 
+    private boolean getWantDecode(MessageContext msgCtxt) throws Exception {
+        String wantDecode = getSimpleOptionalProperty("want-base64-decode", msgCtxt);
+        if (wantDecode == null) { return false; }
+        return Boolean.parseBoolean(wantDecode.toLowerCase());
+    }
+    
     private String getDestination(MessageContext msgCtxt) throws Exception {
         String destination = getSimpleOptionalProperty("destination", msgCtxt);
         if (destination == null) { destination = "message"; }
@@ -68,28 +74,40 @@ public class MultipartFormCallout extends CalloutBase implements Execution {
     public ExecutionResult execute (final MessageContext msgCtxt, final ExecutionContext execContext) {
         try {
             String contentVar = getPartContentVar(msgCtxt);
+            boolean mustSetDestination = false;
             String content = (String) msgCtxt.getVariable(contentVar);
             byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
-            InputStream decodingStream = new Base64InputStream(new ByteArrayInputStream(contentBytes), false); // decoding
-            byte[] decodedBytes = IOUtils.toByteArray(decodingStream);
-            msgCtxt.setVariable(varName("decoded_length"), decodedBytes.length);
-            String boundary = RandomStringUtils.randomAlphanumeric(10);
+            boolean wantDecode = getWantDecode(msgCtxt);
+            if (wantDecode) {
+                InputStream decodingStream = new Base64InputStream(new ByteArrayInputStream(contentBytes), false); // decoding
+                byte[] decodedBytes = IOUtils.toByteArray(decodingStream);
+                msgCtxt.setVariable(varName("decoded_length"), decodedBytes.length);
+                contentBytes = decodedBytes;
+            }
+
+            String boundary = "--------------------" + RandomStringUtils.randomAlphanumeric(14);
             String destination = getDestination(msgCtxt);
             Message message = (Message) msgCtxt.getVariable(destination);
             if (message == null) {
-                throw new IllegalStateException("message " + destination + " does not exist.");
+                mustSetDestination = true;
+                message = msgCtxt.createMessage(msgCtxt
+                                                .getClientConnection()
+                                                .getMessageFactory()
+                                                .createRequest(msgCtxt));
             }
-            msgCtxt.setVariable(destination + ".header.content-type", "multipart/form-data;boundary=" + boundary);
+            msgCtxt.setVariable(varName("boundary"), boundary);
+            message.setHeader("content-type", "multipart/form-data;boundary=" + boundary);
             Part filepart = Part.create( getPartName(msgCtxt),
-                                         new ByteArrayPayload((byte[])decodedBytes),
+                                         new ByteArrayPayload((byte[])contentBytes),
                                          new Part.PartOptions().contentType( getPartContentType(msgCtxt) ));
 
             MultipartForm mpf = new MultipartForm(boundary, new Part[] {filepart});
             byte[] payload = IOUtils.toByteArray( mpf.openStream() );
             msgCtxt.setVariable(varName("payload_length"), payload.length);
             message.setContent(new ByteArrayInputStream(payload));
-
-            //msgCtxt.setVariable(getOutputVar(msgCtxt), payload);
+            if (mustSetDestination) {
+                msgCtxt.setVariable(destination,message);
+            }
             return ExecutionResult.SUCCESS;
         }
         catch (Exception e) {

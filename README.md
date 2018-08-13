@@ -1,12 +1,10 @@
 # Apigee Edge Multipart Form Creator
 
 This directory contains the Java source code and pom.xml file required to build a Java callout that
-creates a multipart form payload, from a single blob that is a base64-encoded string.
-
-For base64-decoding, it uses the [Base64InputStream](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64InputStream.html) from Apache commons-codec.
+creates a multipart form payload, from a single blob, or parses an inbound multipart form parload.
 
 For creating the multipart form, it relies on code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
-
+For parsing, it relies on code lifted from [javadelight](https://github.com/javadelight/delight-fileupload). I didn't use the entire libraries for either of these things, because they drag in too many un-desired dependencies.
 
 ## Disclaimer
 
@@ -20,7 +18,7 @@ All you need is the built JAR, and the appropriate configuration for the policy.
 If you want to build it, feel free.  The instructions are at the bottom of this readme.
 
 
-1. copy the jar file, available in  target/edge-custom-multipart-form-1.0.1.jar , if you have built the jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-multipart-form-1.0.1.jar) if you have not, to your apiproxy/resources/java directory. You can do this offline, or using the graphical Proxy Editor in the Apigee Edge Admin Portal.
+1. copy the jar file, available in  target/edge-custom-multipart-form-1.0.2.jar , if you have built the jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-multipart-form-1.0.2.jar) if you have not, to your apiproxy/resources/java directory. You can do this offline, or using the graphical Proxy Editor in the Apigee Edge Admin Portal.
 
 2. include an XML file for the Java callout policy in your
    apiproxy/resources/policies directory. It should look
@@ -29,8 +27,8 @@ If you want to build it, feel free.  The instructions are at the bottom of this 
    ```xml
     <JavaCallout name='Java-Multipart-Form-1'>
         ...
-      <ClassName>com.google.apigee.edgecallouts.MultipartFormCallout</ClassName>
-      <ResourceURL>java://edge-custom-multipart-form-1.0.1.jar</ResourceURL>
+      <ClassName>com.google.apigee.edgecallouts.MultipartFormCreator</ClassName>
+      <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
     </JavaCallout>
    ```
 
@@ -50,7 +48,15 @@ If you want to build it, feel free.  The instructions are at the bottom of this 
 
 ## Notes on Usage
 
-There is one callout class, com.google.apigee.edgecallouts.MultipartFormCallout
+This repo includes two callout classes,
+
+* com.google.apigee.edgecallouts.MultipartFormCreator - create a form payload
+
+* com.google.apigee.edgecallouts.MultipartFormParser - parse a form payload
+
+## MultipartFormCreator
+
+This callout will create a form, using a specific string as input. Optionally, the callout will base64-decode the string before placing it into the form. For base64-decoding, it uses the [Base64InputStream](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/binary/Base64InputStream.html) from Apache commons-codec.
 
 It accepts several data items as input
 
@@ -59,27 +65,22 @@ It accepts several data items as input
 | **contentVar**  | required | name of a variable containing a string which represents a base64-encoded byte array |
 | **contentType** | required | a string, something like image/jpeg or image/png etc                       |
 | **part-name**   | required | a string, the name of the part within the form                             |
-| **destination** | optional | a string, the name of an existing message. Defaults to 'request'.          |
-
-This callout operates on the message content.
-If you place it in the request flow, it will operate on the request content.
-If you attach the policy to the response flow, it will operate on the response content.
-You probably want it in the request flow!
+| **want-base64-decode**   | optional | true or false. If not present, assumed false.                     |
+| **destination** | optional | a string, the name of a  message. If it does not exist, it will be created. Defaults to 'message'.          |
 
 
-## Configuring the Callout
-
-An example for encoding:
+An example for creating a form:
 
 ```xml
 <JavaCallout name='Java-CreateMultipartForm'>
   <Properties>
     <Property name="contentVar">base64EncodedImageData</Property>
     <Property name="contentType">image/png</Property>
+    <Property name="want-base64-decode">true</Property>
     <Property name="part-name">image</Property>
   </Properties>
-  <ClassName>com.google.apigee.edgecallouts.MultipartFormCallout</ClassName>
-  <ResourceURL>java://edge-custom-multipart-form-1.0.1.jar</ResourceURL>
+  <ClassName>com.google.apigee.edgecallouts.MultipartFormCreator</ClassName>
+  <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -99,6 +100,43 @@ IHDREXtSoftwareAdobe ImageReadyqe<:GIDATxZr@F8Kuzko-'[$\@...more image data here
 ```
 
 
+## MultipartFormParser
+
+This callout will parse a form, using the content of the specified message as input.
+
+It accepts a single parameter as input
+
+| property name   | status   | description                                                                |
+| ----------------| -------- | -------------------------------------------------------------------------- |
+| **source**      | optional | name of a variable containing a message, containing a form. defaults to "message". |
+
+An example for parsing a form:
+
+```xml
+<JavaCallout name='Java-CreateMultipartForm'>
+  <Properties>
+    <Property name="source">message</Property>
+  </Properties>
+  <ClassName>com.google.apigee.edgecallouts.MultipartFormParser</ClassName>
+  <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
+</JavaCallout>
+```
+
+The callout sets variables in the context containing information about the parts of the inbound form.
+
+
+| property name     | description                                                                |
+| ------------------| -------------------------------------------------------------------------- |
+| **items**         | String, a comma-separated list of file items from the form.  |
+| **itemcount**     | String, a number indicating the number of  file items found in the form.  |
+| **item_filename_X** | name of item X.  |
+| **item_content_X**  | content for item X.  This is a byte array. May need to decode it.  |
+| **item_content-type_X**  | String, the content-type for item X. |
+| **item_size_X**  | String, the size in bytes of the content for item X. |
+
+Subsequent policies can then read these variables and operate on them.
+
+
 ## Example API Proxy
 
 You can find an example proxy bundle that uses the policy, [here in this repo](bundle/apiproxy).
@@ -108,15 +146,32 @@ You must deploy the proxy in order to invoke it.
 
 Invoke it like this:
 
-```
-  curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
-```
+* Create a form, using "message":
+  ```
+    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
+  ```
 
-Internally, the example proxy assigns a static, fixed string value to a variable, and uses THAT as the contentVar for the policy.
-It then invokes the policy, which creates the form payload.
-The proxy then sends the form to a backend system.
+  Internally, the example proxy assigns a static, fixed string value to
+  a variable, and uses THAT as the contentVar for the policy.  It then
+  invokes the policy, which creates the form payload.  The proxy then
+  sends the form to a backend system.
 
-NB: The backend system as of this moment does not correctly handle the form.  This is because the backend doesn't handle forms; it's not because the form is invalid.
+  NB: The backend system as of this moment does not correctly handle the
+  form.  This is because the backend doesn't handle forms; it's not
+  because the form is invalid.
+
+* Create a form, using a new message
+  ```
+    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t2
+  ```
+
+* Parse a form
+
+  ```
+    curl -i -F person=anonymous -F readme=@../README.md https://$ORG-$ENV.apigee.net/multipart-form-creator/t3
+
+  ```
+
 
 
 ## Building
@@ -137,17 +192,6 @@ Building from source requires Java 1.8, and Maven.
   This will build the jar and also run all the tests, and copy the jar to the resource directory in the sample apiproxy bundle.
 
 
-## Runtime Dependencies
-
-All of these are runtime dependencies. These JARs must be available in the proxy or organization into which you deploy.
-
-- Apigee Edge expressions v1.0
-- Apigee Edge message-flow v1.0
-- Apache commons IO 2.3
-- Apache commons codec 1.11
-- Apache commons lang3 3.7
-- Google Guava 24.1
-
 ## License
 
 This material is Copyright 2018 Google LLC.
@@ -155,4 +199,4 @@ and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java 
 
 ## Bugs
 
-* The tests are incomplete.
+* The automated tests are pretty thin.

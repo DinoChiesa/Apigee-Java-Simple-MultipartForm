@@ -31,7 +31,7 @@
       <!--
           Example invocation:
 
-       curl -i -X GET https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
 
       -->
       <Request>
@@ -39,13 +39,63 @@
           <Name>AV-ImageData</Name>
         </Step>
         <Step>
-          <Name>Java-CreateMultipartForm</Name>
+          <Name>Java-CreateMultipartForm-1</Name>
         </Step>
       </Request>
 
       <Response>
       </Response>
       <Condition>(proxy.pathsuffix MatchesPath "/t1") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='test 2'>
+      <Description>Create a multi-part form in a new message</Description>
+      <!--
+          Example invocation:
+
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t2
+      -->
+      <Request>
+        <Step>
+          <Name>AV-TextFileData</Name>
+        </Step>
+        <Step>
+          <Name>Java-CreateMultipartForm-2</Name>
+        </Step>
+        <Step>
+          <Name>SC-SendForm</Name>
+        </Step>
+      </Request>
+
+      <Response>
+        <Step>
+          <Name>AM-Response-1</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/t2") and (request.verb = "POST")</Condition>
+    </Flow>
+
+
+    <Flow name='test 3'>
+      <Description>Parse a multi-part form in the inbound message</Description>
+      <!--
+          Example invocation:
+
+       curl -i -X POST ... https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t3
+
+      -->
+      <Request>
+        <Step>
+          <Name>Java-ParseMultipartForm-1</Name>
+        </Step>
+      </Request>
+
+      <Response>
+        <Step>
+          <Name>AM-Response-2</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/t3") and (request.verb = "POST")</Condition>
     </Flow>
 
 
@@ -60,6 +110,9 @@
 
   <RouteRule name='InvokeRouteRule'>
     <TargetEndpoint>default</TargetEndpoint>
+    <Condition>NOT (proxy.pathsuffix MatchesPath "/t2")</Condition>
   </RouteRule>
+
+  <RouteRule name='Loopback'/>
 
 </ProxyEndpoint>
