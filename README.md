@@ -1,10 +1,10 @@
 # Apigee Edge Multipart Form Creator
 
 This directory contains the Java source code and pom.xml file required to build a Java callout that
-creates a multipart form payload, from a single blob, or parses an inbound multipart form parload.
+creates a multipart form payload, from a single blob, or parses an inbound multipart form payload.
 
-For creating the multipart form, it relies on code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
-For parsing, it relies on code lifted from [javadelight](https://github.com/javadelight/delight-fileupload). I didn't use the entire libraries for either of these things, because they drag in too many un-desired dependencies.
+For creating the multipart form, it relies on Apache-licensed code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
+For parsing, it relies on Apache-licensed code lifted from [javadelight](https://github.com/javadelight/delight-fileupload). I didn't use the entire libraries for either of these things, because they drag in too many un-desired dependencies.
 
 ## Disclaimer
 
@@ -13,12 +13,20 @@ This example is not an official Google product, nor is it part of an official Go
 
 ## Using this policy
 
-You do not need to build the source code in order to use the policy in Apigee Edge.
-All you need is the built JAR, and the appropriate configuration for the policy.
-If you want to build it, feel free.  The instructions are at the bottom of this readme.
+You do not need to build the source code in order to use the policy in
+Apigee Edge.  All you need is the built JAR, and the appropriate
+configuration for the policy.  If you want to build it, feel free.  The
+instructions are at the bottom of this readme. Even without
+instructions, you should be able to figure it out if you know and use
+maven.
 
 
-1. copy the jar file, available in  target/edge-custom-multipart-form-1.0.2.jar , if you have built the jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-multipart-form-1.0.2.jar) if you have not, to your apiproxy/resources/java directory. You can do this offline, or using the graphical Proxy Editor in the Apigee Edge Admin Portal.
+1. copy the jar file, available in
+   target/edge-custom-multipart-form-1.0.2.jar , if you have built the
+   jar, or in [the repo](bundle/apiproxy/resources/java/edge-custom-multipart-form-1.0.2.jar)
+   if you have not, to your apiproxy/resources/java directory. You can
+   do this offline, or using the graphical Proxy Editor in the Apigee
+   Edge Admin Portal.
 
 2. include an XML file for the Java callout policy in your
    apiproxy/resources/policies directory. It should look
@@ -90,7 +98,7 @@ How you get the string there, is up to you.
 The result will be a form, that looks like so:
 
 ```
---9WTvUeO4O5
+--------------------9WTvUeO4O5
 Content-Disposition: form-data; name="image"
 Content-Type: image/png
 
@@ -120,6 +128,17 @@ An example for parsing a form:
   <ClassName>com.google.apigee.edgecallouts.MultipartFormParser</ClassName>
   <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
 </JavaCallout>
+```
+
+The inbound message should look like this:
+```
+--------------------9WTvUeO4O5
+Content-Disposition: form-data; filename="whatever.txt"
+Content-Type: text/plain
+
+Hello World
+--------------------9WTvUeO4O5
+...
 ```
 
 The callout sets variables in the context containing information about the parts of the inbound form.
