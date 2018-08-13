@@ -1,4 +1,4 @@
-# Apigee Edge Multipart Form Creator
+# Apigee Edge Multipart Form Callout
 
 This directory contains the Java source code and pom.xml file required to build a Java callout that
 creates a multipart form payload, from a single blob, or parses an inbound multipart form payload.
@@ -167,7 +167,7 @@ Invoke it like this:
 
 * Create a form, using "message":
   ```
-    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
+    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t1
   ```
 
   Internally, the example proxy assigns a static, fixed string value to
@@ -181,13 +181,13 @@ Invoke it like this:
 
 * Create a form, using a new message
   ```
-    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t2
+    curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t2
   ```
 
 * Parse a form
 
   ```
-    curl -i -F person=anonymous -F readme=@../README.md https://$ORG-$ENV.apigee.net/multipart-form-creator/t3
+    curl -i -F field=value -F readme=@README.md https://$ORG-$ENV.apigee.net/multipart-form/t3
 
   ```
 

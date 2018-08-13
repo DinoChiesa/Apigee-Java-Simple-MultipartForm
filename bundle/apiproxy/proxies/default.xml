@@ -1,7 +1,7 @@
 <ProxyEndpoint name='default'>
   <Description>Proxy for Java callout MultipartForm</Description>
   <HTTPProxyConnection>
-    <BasePath>/multipart-form-creator</BasePath>
+    <BasePath>/multipart-form</BasePath>
     <Properties/>
     <!-- <VirtualHost>default</VirtualHost> -->
     <VirtualHost>secure</VirtualHost>
@@ -31,7 +31,7 @@
       <!--
           Example invocation:
 
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t1
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t1
 
       -->
       <Request>
@@ -53,7 +53,7 @@
       <!--
           Example invocation:
 
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t2
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t2
       -->
       <Request>
         <Step>
@@ -81,7 +81,7 @@
       <!--
           Example invocation:
 
-       curl -i -X POST ... https://${ORG}-${ENV}.apigee.net/multipart-form-creator/t3
+       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/t3
 
       -->
       <Request>
