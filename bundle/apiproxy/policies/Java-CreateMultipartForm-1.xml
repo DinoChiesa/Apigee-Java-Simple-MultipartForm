@@ -6,5 +6,5 @@
     <Property name="part-name">image</Property>
   </Properties>
   <ClassName>com.google.apigee.edgecallouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://edge-custom-multipart-form-1.0.2.jar</ResourceURL>
+  <ResourceURL>java://edge-custom-multipart-form-20200309.jar</ResourceURL>
 </JavaCallout>

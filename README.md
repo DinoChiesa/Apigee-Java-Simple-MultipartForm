@@ -42,7 +42,6 @@ maven.
 
 3. use the Edge UI, or a command-line tool like
    [importAndDeploy.js](https://github.com/DinoChiesa/apigee-edge-js/blob/master/examples/importAndDeploy.js) or
-   [pushapi](https://github.com/carloseberhardt/apiploy) or
    [apigeetool](https://github.com/apigee/apigeetool-node)
    or similar to
    import your proxy into an Edge organization, and then deploy the proxy .

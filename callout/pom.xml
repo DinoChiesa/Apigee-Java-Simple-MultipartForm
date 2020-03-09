@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.apigee.callout</groupId>
   <artifactId>edge-custom-multipart-form</artifactId>
-  <version>1.0.2</version>
+  <version>20200309</version>
   <name>EdgeCustomMultipartForm</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
@@ -16,40 +16,33 @@
     <apiproxy.java.rsrc.dir>../bundle/apiproxy/resources/java</apiproxy.java.rsrc.dir>
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
-    <jackson.version>2.9.2</jackson.version>
+    <jackson.version>[2.9.10.3,)</jackson.version>
   </properties>
 
   <dependencies>
 
+
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.3</version>
-      <scope>compile</scope>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>26.0-jre</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.11</version>
-      <scope>compile</scope>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
     </dependency>
 
-<dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>javax.servlet-api</artifactId>
-    <version>3.1.0</version>
-    <scope>provided</scope>
-</dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.3.3</version>
+    </dependency>
 
-<dependency>
-    <groupId>commons-fileupload</groupId>
-    <artifactId>commons-fileupload</artifactId>
-    <version>1.3.3</version>
-</dependency>
-
-
-<!--
+    <!--
 
 The following 2 jar dependencies from Apigee are not avaiable in any
 public repo. You can install them in your machine-local repo (The .m2
@@ -88,6 +81,21 @@ mvn install:install-file \
       <version>1.0.0</version>
     </dependency>
 
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.6</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.14</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -116,17 +124,6 @@ mvn install:install-file \
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>24.1-jre</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.7</version>
-    </dependency>
 
   </dependencies>
 
@@ -146,6 +143,7 @@ mvn install:install-file \
             </goals>
             <configuration>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
+              <includeScope>compile</includeScope>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
@@ -157,7 +155,7 @@ mvn install:install-file \
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.8.0</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -167,7 +165,7 @@ mvn install:install-file \
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.1</version>
         <configuration>
           <archive>
             <!-- do not include the pom.xml file in the generated jar -->
@@ -186,16 +184,30 @@ mvn install:install-file \
               <tasks>
                 <copy todir="${apiproxy.java.rsrc.dir}">
                   <fileset dir="${project.build.directory}">
-                    <include name="${project.artifactId}-${project.version}.jar"/>
+                    <include name="${project.build.finalName}.jar"/>
                     <!-- copy any required dependencies tht are not
-                    already included in the Edge runtime: -->
+                         already included in the Edge runtime: -->
+                    <include name="lib/*.jar"/>
+                    <exclude name="lib/message-flow-1.0.0.jar"/>
+                    <exclude name="lib/expressions-1.0.0.jar"/>
 
-                    <include name="lib/commons-codec-1.11.jar"/>
-                    <include name="lib/commons-io-2.3.jar"/>
-                    <include name="lib/commons-fileupload-1.3.3.jar"/>
-                    <include name="lib/commons-lang-3.7.jar"/>
-                    <include name="lib/error_prone_annotations-2.1.3.jar"/>
-                    <include name="lib/guava-24.1-jre.jar"/>
+                    <!-- guava and its dependencies -->
+                    <exclude name="lib/guava-*.jar"/>
+                    <exclude name="lib/jsr305-*.jar"/>
+                    <exclude name="lib/animal-sniffer-annotations-1.14.jar"/>
+                    <exclude name="lib/error_prone_annotations-2.1.3.jar"/>
+                    <exclude name='lib/j2objc-annotations-1.1.jar'/>
+                    <exclude name='lib/checker-qual-2.5.2.jar'/>
+
+                    <exclude name='lib/javax.servlet-api-3.1.0.jar'/>
+
+                    <!--
+                        <include name="lib/commons-codec-1.11.jar"/>
+                        <include name="lib/commons-io-2.3.jar"/>
+                        <include name="lib/commons-fileupload-1.3.3.jar"/>
+                        <include name="lib/commons-lang-3.7.jar"/>
+                        <include name="lib/error_prone_annotations-2.1.3.jar"/>
+                    -->
 
 
                     <!--                    -->
@@ -207,6 +219,42 @@ mvn install:install-file \
             </configuration>
             <goals>
               <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.5</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.7</version>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>display-dependency-updates</goal>
+              <goal>display-plugin-updates</goal>
             </goals>
           </execution>
         </executions>
