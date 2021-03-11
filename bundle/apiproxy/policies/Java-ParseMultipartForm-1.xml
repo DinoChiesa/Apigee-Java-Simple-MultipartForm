@@ -2,6 +2,6 @@
   <Properties>
     <Property name="source">message</Property>
   </Properties>
-  <ClassName>com.google.apigee.edgecallouts.MultipartFormParser</ClassName>
-  <ResourceURL>java://edge-custom-multipart-form-20200309.jar</ResourceURL>
+  <ClassName>com.google.apigee.callouts.MultipartFormParser</ClassName>
+  <ResourceURL>java://apigee-multipart-form-20210311.jar</ResourceURL>
 </JavaCallout>

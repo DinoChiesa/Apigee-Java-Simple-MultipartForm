@@ -26,41 +26,22 @@
   </PostClientFlow>
 
   <Flows>
-    <Flow name='test 1'>
-      <Description>Create a multi-part form</Description>
-      <!--
-          Example invocation:
-
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t1
-
-      -->
-      <Request>
-        <Step>
-          <Name>AV-ImageData</Name>
-        </Step>
-        <Step>
-          <Name>Java-CreateMultipartForm-1</Name>
-        </Step>
-      </Request>
-
-      <Response>
-      </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/t1") and (request.verb = "POST")</Condition>
-    </Flow>
-
-    <Flow name='test 2'>
+    <Flow name='test create a multi-part form with multiple parts'>
       <Description>Create a multi-part form in a new message</Description>
       <!--
           Example invocation:
 
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/t2
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-multi
       -->
       <Request>
         <Step>
           <Name>AV-TextFileData</Name>
         </Step>
         <Step>
-          <Name>Java-CreateMultipartForm-2</Name>
+          <Name>AV-ImageData</Name>
+        </Step>
+        <Step>
+          <Name>Java-CreateMultipartForm-Multi</Name>
         </Step>
         <Step>
           <Name>SC-SendForm</Name>
@@ -72,11 +53,60 @@
           <Name>AM-Response-1</Name>
         </Step>
       </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/t2") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix MatchesPath "/create-multi") and (request.verb = "POST")</Condition>
     </Flow>
 
 
-    <Flow name='test 3'>
+    <Flow name='test create 1'>
+      <Description>Create a multi-part form with a single part</Description>
+      <!--
+          Example invocation:
+
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-1a
+
+      -->
+      <Request>
+        <Step>
+          <Name>AV-ImageData</Name>
+        </Step>
+        <Step>
+          <Name>Java-CreateMultipartForm-1a</Name>
+        </Step>
+      </Request>
+
+      <Response>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/create-1a") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='test create 2'>
+      <Description>Create a multi-part form with a signle part, in a new message</Description>
+      <!--
+          Example invocation:
+
+       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-1b
+      -->
+      <Request>
+        <Step>
+          <Name>AV-TextFileData</Name>
+        </Step>
+        <Step>
+          <Name>Java-CreateMultipartForm-1b</Name>
+        </Step>
+        <Step>
+          <Name>SC-SendForm</Name>
+        </Step>
+      </Request>
+
+      <Response>
+        <Step>
+          <Name>AM-Response-1</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/create-1b") and (request.verb = "POST")</Condition>
+    </Flow>
+
+    <Flow name='test parse 1'>
       <Description>Parse a multi-part form in the inbound message</Description>
       <!--
           Example invocation:
@@ -95,7 +125,7 @@
           <Name>AM-Response-2</Name>
         </Step>
       </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/t3") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix MatchesPath "/parse1") and (request.verb = "POST")</Condition>
     </Flow>
 
 
@@ -110,7 +140,7 @@
 
   <RouteRule name='InvokeRouteRule'>
     <TargetEndpoint>default</TargetEndpoint>
-    <Condition>proxy.pathsuffix MatchesPath "/t1"</Condition>
+    <Condition>proxy.pathsuffix MatchesPath "/none"</Condition>
   </RouteRule>
 
   <RouteRule name='Loopback'/>

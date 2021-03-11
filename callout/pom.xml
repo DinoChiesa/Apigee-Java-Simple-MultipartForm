@@ -4,9 +4,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.apigee.callout</groupId>
-  <artifactId>edge-custom-multipart-form</artifactId>
-  <version>20200309</version>
-  <name>EdgeCustomMultipartForm</name>
+  <artifactId>apigee-multipart-form</artifactId>
+  <version>20210311</version>
+  <name>ApigeeCustomMultipartForm</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>
   <properties>
@@ -17,10 +17,23 @@
     <testng.version>6.8.7</testng.version> <!-- current: 6.9.4 -->
     <jmockit.version>1.7</jmockit.version>
     <jackson.version>[2.9.10.3,)</jackson.version>
+    <gson.version>2.8.6</gson.version>
+    <javaxjson.version>1.1.4</javaxjson.version>
   </properties>
 
   <dependencies>
 
+    <!-- https://mvnrepository.com/artifact/javax.json/javax.json-api -->
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>${javaxjson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>${javaxjson.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -28,6 +41,15 @@
       <version>26.0-jre</version>
       <scope>provided</scope>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+<!--
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>${gson.version}</version>
+    </dependency>
+-->
 
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -80,7 +102,6 @@ mvn install:install-file \
       <artifactId>expressions</artifactId>
       <version>1.0.0</version>
     </dependency>
-
 
     <dependency>
       <groupId>commons-io</groupId>

@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-package com.google.apigee.edgecallouts;
+package com.google.apigee.callouts;
 
 import com.apigee.flow.message.MessageContext;
 import java.io.ByteArrayOutputStream;

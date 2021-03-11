@@ -15,6 +15,11 @@
       <Header name='X-Powered-By'/>
     </Headers>
   </Remove>
-  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
-  <AssignTo createNew='false' transport='http' type='response'/>
+  <Set>
+    <Headers>
+      <Header name="apiproxy">{apiproxy.name} r{apiproxy.revision}</Header>
+    </Headers>
+  </Set>
+  <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+
 </AssignMessage>

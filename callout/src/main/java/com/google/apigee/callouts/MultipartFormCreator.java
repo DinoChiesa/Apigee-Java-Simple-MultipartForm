@@ -1,6 +1,6 @@
 // MultipartFormCreator.java
 //
-// Copyright (c) 2018 Google LLC.
+// Copyright (c) 2018-2021 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,24 +15,30 @@
 // limitations under the License.
 //
 
-package com.google.apigee.edgecallouts;
+package com.google.apigee.callouts;
 
+import com.google.apigee.json.JavaxJson;
 import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.execution.spi.Execution;
 import com.apigee.flow.message.Message;
 import com.apigee.flow.message.MessageContext;
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.MultipartForm;
 import org.jclouds.io.payloads.Part;
+//import com.google.gson.Gson;
 
 public class MultipartFormCreator extends CalloutBase implements Execution {
   private static final String varprefix = "mpf_";
   private static final boolean wantStringDefault = true;
+  //private static final Gson gson = new Gson();
 
   public MultipartFormCreator(Map properties) {
     super(properties);
@@ -58,6 +64,10 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
     return destination;
   }
 
+  private String getDescriptor(MessageContext msgCtxt) throws Exception {
+    return getSimpleOptionalProperty("descriptor", msgCtxt);
+  }
+
   private String getPartContentVar(MessageContext msgCtxt) throws Exception {
     return getSimpleRequiredProperty("contentVar", msgCtxt);
   }
@@ -70,7 +80,9 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
     return getSimpleRequiredProperty("part-name", msgCtxt);
   }
 
-  public ExecutionResult execute(final MessageContext msgCtxt, final ExecutionContext execContext) {
+  private ExecutionResult execute_20200309(
+      final MessageContext msgCtxt, final ExecutionContext execContext) {
+    // original implementation, creates a form with a single part
     try {
       String contentVar = getPartContentVar(msgCtxt);
       boolean mustSetDestination = false;
@@ -107,6 +119,87 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
       if (mustSetDestination) {
         msgCtxt.setVariable(destination, message);
       }
+      return ExecutionResult.SUCCESS;
+    } catch (IllegalStateException exc1) {
+      setExceptionVariables(exc1, msgCtxt);
+      return ExecutionResult.ABORT;
+    } catch (Exception e) {
+      if (getDebug()) {
+        String stacktrace = getStackTraceAsString(e);
+        msgCtxt.setVariable(varName("stacktrace"), stacktrace);
+      }
+      setExceptionVariables(e, msgCtxt);
+      return ExecutionResult.ABORT;
+    }
+  }
+
+  public ExecutionResult execute(final MessageContext msgCtxt, final ExecutionContext execContext) {
+    try {
+      String descriptor = getDescriptor(msgCtxt);
+      if (descriptor == null) {
+        return execute_20200309(msgCtxt, execContext);
+      }
+
+      boolean mustSetDestination = false;
+      Map<String, Object> map = JavaxJson.fromJson(descriptor, Map.class);
+      //Map<String, Object> map = gson.fromJson(new StringReader(), Map.class);
+      // eg
+      // {
+      //   "part1.txt" : {
+      //     "content-var" :  "variable-name-here",
+      //     "content-type" : "content-type-here",
+      //     "want-b64-decode": false
+      //   },
+      //   "part2.png" : {
+      //     "content-var" :  "variable-name-here",
+      //     "content-type" : "content-type-here",
+      //     "want-b64-decode": false
+      //   }
+      // }
+
+      String boundary = "--------------------" + randomAlphanumeric(14);
+      msgCtxt.setVariable(varName("boundary"), boundary);
+      String destination = getDestination(msgCtxt);
+      Message message = (Message) msgCtxt.getVariable(destination);
+      if (message == null) {
+        mustSetDestination = true;
+        message =
+            msgCtxt.createMessage(
+                msgCtxt.getClientConnection().getMessageFactory().createRequest(msgCtxt));
+      }
+      message.setHeader("content-type", "multipart/form-data;boundary=" + boundary);
+
+      List<Part> parts = new ArrayList<Part>();
+      for (Map.Entry<String, Object> entry : map.entrySet()) {
+        String partName = entry.getKey();
+        Map<String, Object> partDefinition = (Map<String, Object>) entry.getValue();
+
+        Object partContent = msgCtxt.getVariable((String) partDefinition.get("content-var"));
+        if (partContent instanceof String) {
+          Boolean wantDecode = (Boolean) partDefinition.get("want-b64-decode");
+          String s = (String) partContent;
+          partContent = s.getBytes(StandardCharsets.UTF_8);
+          if (wantDecode) {
+            partContent = Base64.getDecoder().decode((byte[]) partContent);
+          }
+        } else if (!(partContent instanceof byte[])) {
+          throw new IllegalStateException(String.format("part %s not of supported type", partName));
+        }
+        parts.add(
+            Part.create(
+                partName,
+                new ByteArrayPayload((byte[]) partContent),
+                new Part.PartOptions().contentType((String) partDefinition.get("content-type"))));
+      }
+
+      MultipartForm mpf = new MultipartForm(boundary, parts);
+      byte[] payload = streamToByteArray(mpf.openStream());
+      msgCtxt.setVariable(varName("payload_length"), payload.length);
+      message.setContent(new ByteArrayInputStream(payload));
+      if (mustSetDestination) {
+        msgCtxt.setVariable(destination, message);
+      }
+
       return ExecutionResult.SUCCESS;
     } catch (IllegalStateException exc1) {
       setExceptionVariables(exc1, msgCtxt);
