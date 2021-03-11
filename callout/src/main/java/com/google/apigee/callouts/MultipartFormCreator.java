@@ -185,11 +185,19 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
         } else if (!(partContent instanceof byte[])) {
           throw new IllegalStateException(String.format("part %s not of supported type", partName));
         }
+
+        Part.PartOptions partOptions =
+          new Part.PartOptions().contentType((String) partDefinition.get("content-type"));
+
+        if (partDefinition.get("transfer-encoding") != null) {
+          partOptions.transferEncoding((String) partDefinition.get("transfer-encoding"));
+        }
+
         parts.add(
             Part.create(
                 partName,
                 new ByteArrayPayload((byte[]) partContent),
-                new Part.PartOptions().contentType((String) partDefinition.get("content-type"))));
+                partOptions));
       }
 
       MultipartForm mpf = new MultipartForm(boundary, parts);

@@ -52,14 +52,24 @@ public class Part extends DelegatingPayload {
          return this;
       }
 
+      Part.PartMap transferEncoding(@Nullable String encoding) {
+         if (encoding != null)
+            put("Content-Transfer-Encoding", encoding);
+         return this;
+      }
+
       public static Part.PartMap create(String name, Payload delegate, Part.PartOptions options) {
          String filename = options != null ? options.getFilename() : null;
          if (delegate instanceof FilePayload)
             filename = FilePayload.class.cast(delegate).getRawContent().getName();
          Part.PartMap returnVal;
          returnVal = (filename != null) ? create(name, filename) : create(name);
-         if (options != null)
+         if (options != null) {
             returnVal.contentType(options.getContentType());
+            if (options.getContentTransferEncoding() != null) {
+               returnVal.transferEncoding((String)options.getContentTransferEncoding());
+            }
+         }
          return returnVal;
 
       }
@@ -73,6 +83,7 @@ public class Part extends DelegatingPayload {
 
    public static class PartOptions {
       private String contentType;
+      private String contentTransferEncoding;
       private String filename;
 
       public Part.PartOptions contentType(String contentType) {
@@ -84,6 +95,10 @@ public class Part extends DelegatingPayload {
          this.filename = checkNotNull(filename, "filename");
          return this;
       }
+      public Part.PartOptions transferEncoding(String encoding) {
+         this.contentTransferEncoding = checkNotNull(encoding, "base64");
+         return this;
+      }
 
       public static class Builder {
          public static Part.PartOptions contentType(String contentType) {
@@ -93,10 +108,18 @@ public class Part extends DelegatingPayload {
          public static Part.PartOptions filename(String filename) {
             return new PartOptions().filename(filename);
          }
+
+         public static Part.PartOptions transferEncoding(String encoding) {
+            return new PartOptions().transferEncoding(encoding);
+         }
       }
 
       public String getContentType() {
          return contentType;
+      }
+
+      public String getContentTransferEncoding() {
+         return contentTransferEncoding;
       }
 
       public String getFilename() {

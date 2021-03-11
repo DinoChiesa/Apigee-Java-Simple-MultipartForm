@@ -83,7 +83,7 @@ An example for creating a form:
       "part1.xml" : {
         "content-var" :  "variable-holding-xml",
         "content-type" : "application/xml",
-        "want-b64-decode": false
+        "want-b64-decode": false,
       },
       "part2.png" : {
         "content-var" :  "image-bytes",
@@ -130,6 +130,34 @@ PNG
 
 ...png data here...
 ----------------------G70E38XDL4FRMV--
+```
+
+
+There is one additional possible field in the descriptor, not shown above
+`transfer-encoding`. If it is present, then the policy will add a header
+specifying that content-transfer-encoding for the given part.  For example, to send a base64-encoded file and mark it as such, use this as a descriptor:
+
+```
+    {
+      "part2.png" : {
+        "content-var" :  "base64-encoded-image-bytes",
+        "content-type" : "image/png",
+        "want-b64-decode": false,
+        "transfer-encoding": "base64"
+      }
+    }
+```
+
+And the output will be like so:
+
+```
+----------------------73B8NBN4LFYLBB
+Content-Disposition: form-data; name="image"
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+
+iVBOR...base64-encoded data here...
+----------------------73B8NBN4LFYLBB--
 ```
 
 
@@ -301,10 +329,9 @@ Building from source requires Java 1.8, and Maven.
 
 ## License
 
-This material is Copyright 2018 Google LLC.
+This material is Copyright 2018-2021 Google LLC.
 and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java code as well as the API Proxy configuration.
 
 ## Bugs
 
 * The automated tests are pretty thin.
-* There is no way to set 'Content-Transfer-Encoding: base64' in the message.
