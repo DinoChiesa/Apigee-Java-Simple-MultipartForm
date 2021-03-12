@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.apigee.callout</groupId>
   <artifactId>apigee-multipart-form</artifactId>
-  <version>20210311</version>
+  <version>20210312</version>
   <name>ApigeeCustomMultipartForm</name>
   <url>http://maven.apache.org</url>
   <packaging>jar</packaging>

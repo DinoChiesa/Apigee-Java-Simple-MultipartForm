@@ -111,7 +111,7 @@
       <!--
           Example invocation:
 
-       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/t3
+       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/parse-1
 
       -->
       <Request>
@@ -125,7 +125,7 @@
           <Name>AM-Response-2</Name>
         </Step>
       </Response>
-      <Condition>(proxy.pathsuffix MatchesPath "/parse1") and (request.verb = "POST")</Condition>
+      <Condition>(proxy.pathsuffix MatchesPath "/parse-1") and (request.verb = "POST")</Condition>
     </Flow>
 
 

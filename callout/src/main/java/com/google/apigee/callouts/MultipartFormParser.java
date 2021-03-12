@@ -55,8 +55,9 @@ public class MultipartFormParser extends CalloutBase implements Execution {
 
   private static List<FileItem> parseForm(final byte[] data, final String contentType)
       throws Exception {
-    final FileItemFactory factory = new DiskFileItemFactory();
-    final ServletFileUpload upload = new ServletFileUpload(factory);
+    final DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
+    fileItemFactory.setSizeThreshold(5*1024*1024);
+    final ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
     final HttpServletRequest request = new AdapterHttpServletRequest(data, contentType);
     final boolean isMultipart = ServletFileUpload.isMultipartContent(request);
     if ((!isMultipart)) {

@@ -22,8 +22,8 @@ maven.
 
 
 1. copy the jar file, available in
-   target/apigee-multipart-form-20210311.jar , if you have built the
-   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210311.jar)
+   target/apigee-multipart-form-20210312.jar , if you have built the
+   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210312.jar)
    if you have not, to your apiproxy/resources/java directory. You can
    do this offline, or using the graphical Proxy Editor in the Apigee
    Edge Admin Portal.
@@ -36,7 +36,7 @@ maven.
     <JavaCallout name='Java-Multipart-Form-1'>
         ...
       <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-      <ResourceURL>java://apigee-multipart-form-20210311.jar</ResourceURL>
+      <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
     </JavaCallout>
    ```
 
@@ -94,7 +94,7 @@ An example for creating a form:
     </Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210311.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -190,7 +190,7 @@ An example for creating a form:
     <Property name="part-name">image</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210311.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -230,7 +230,7 @@ An example for parsing a form:
     <Property name="source">message</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormParser</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210311.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -253,11 +253,14 @@ The callout sets variables in the context containing information about the parts
 | **items**                | String, a comma-separated list of file items from the form.                |
 | **itemcount**            | String, a number indicating the number of  file items found in the form.   |
 | **item_filename_N**      | name of item number N.                                                     |
-| **item_content_N**       | content for item N.  This is a byte array. You may need to decode it.      |
+| **item_content_N**       | content for item N.  This is a byte array. You may need to decode it using a subsequent policy.      |
 | **item_content-type_N**  | String, the content-type for item N.                                       |
 | **item_size_N**          | String, the size in bytes of the content for item N.                       |
 
 Subsequent policies can then read these variables and operate on them.
+
+There is a limit of 5MB for the size of the uploaded files in the multipart
+form.  If you have an upload which exceeds that limit the callout will fail.
 
 
 ## Example API Proxy
@@ -335,3 +338,4 @@ and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java 
 ## Bugs
 
 * The automated tests are pretty thin.
+* There is no way to adjust the size limit for the uploaded files. 
