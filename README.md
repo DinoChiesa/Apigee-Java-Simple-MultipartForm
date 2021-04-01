@@ -22,8 +22,8 @@ maven.
 
 
 1. copy the jar file, available in
-   target/apigee-multipart-form-20210312.jar , if you have built the
-   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210312.jar)
+   target/apigee-multipart-form-20210401.jar , if you have built the
+   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210401.jar)
    if you have not, to your apiproxy/resources/java directory. You can
    do this offline, or using the graphical Proxy Editor in the Apigee
    Edge Admin Portal.
@@ -36,7 +36,7 @@ maven.
     <JavaCallout name='Java-Multipart-Form-1'>
         ...
       <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-      <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
+      <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
     </JavaCallout>
    ```
 
@@ -55,11 +55,13 @@ maven.
 
 ## Notes on Usage
 
-This repo includes two callout classes,
+This repo includes three callout classes,
 
 * com.google.apigee.callouts.MultipartFormCreator - create a form payload
 
 * com.google.apigee.callouts.MultipartFormParser - parse a form payload
+
+* com.google.apigee.callouts.ContentSetter - set a byte array into message content
 
 ## MultipartFormCreator
 
@@ -94,7 +96,7 @@ An example for creating a form:
     </Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -190,7 +192,7 @@ An example for creating a form:
     <Property name="part-name">image</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -230,7 +232,7 @@ An example for parsing a form:
     <Property name="source">message</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormParser</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -261,6 +263,32 @@ Subsequent policies can then read these variables and operate on them.
 
 There is a limit of 5MB for the size of the uploaded files in the multipart
 form.  If you have an upload which exceeds that limit the callout will fail.
+
+
+## ContentSetter
+
+This callout will set a byte array into a message content.
+This callout may be useful after parsing a multipart form, if you want to set ONE of the parsed items into the message content of a message.
+
+It accepts two properties as input:
+
+| property name   | description                                                                                  |
+| ----------------| -------------------------------------------------------------------------------------------- |
+| **destination** | optional, a string, the name of a message. If it does not exist, it will be created. Defaults to 'message'.          |
+| **contentVar**  | required\*. the name of a context variable, which contains a byte array or string.  |
+
+Example:
+
+```xml
+<JavaCallout name='Java-SetContent>
+  <Properties>
+    <Property name="destination">message</Property>
+    <Property name="contentVar">mpf_item_content_1</Property>
+  </Properties>
+  <ClassName>com.google.apigee.callouts.ContentSetter</ClassName>
+  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+</JavaCallout>
+```
 
 
 ## Example API Proxy

@@ -4,5 +4,5 @@
     <Property name="debug">true</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormParser</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210312.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
 </JavaCallout>

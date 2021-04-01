@@ -16,145 +16,18 @@
 
 package com.google.apigee.callouts;
 
-import com.apigee.flow.execution.ExecutionContext;
 import com.apigee.flow.execution.ExecutionResult;
 import com.apigee.flow.message.Message;
-import com.apigee.flow.message.MessageContext;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileOutputStream;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import mockit.Mock;
-import mockit.MockUp;
-import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class TestMultipartFormCreator {
-  private static final String testDataDir = "src/test/resources/test-data";
-  private static final boolean verbose = true;
-
-  MessageContext msgCtxt;
-  InputStream messageContentStream;
-  Message message;
-  ExecutionContext exeCtxt;
-
-  @BeforeMethod()
-  public void beforeMethod() {
-
-    msgCtxt =
-        new MockUp<MessageContext>() {
-          private Map variables;
-
-          public void $init() {
-            variables = new HashMap();
-          }
-
-          @Mock()
-          public <T> T getVariable(final String name) {
-            if (variables == null) {
-              variables = new HashMap();
-            }
-            // T value = null;
-            // if (name.equals("message")) {
-            //     value = (T) message;
-            // }
-            // value = (T) variables.get(name);
-            // if (verbose)
-            //   System.out.printf(
-            //                     "getVariable(%s) <= %s\n", name, (value != null) ? value : "(null)");
-            // return value;
-
-            if (name.equals("message")) {
-                return (T) message;
-            }
-            return (T) variables.get(name);
-          }
-
-          @Mock()
-          public boolean setVariable(final String name, final Object value) {
-            if (verbose)
-              System.out.printf(
-                  "setVariable(%s) <= %s\n", name, (value != null) ? value : "(null)");
-            if (variables == null) {
-              variables = new HashMap();
-            }
-            if (name.equals("message.content")) {
-              if (value instanceof String) {
-                messageContentStream =
-                    new ByteArrayInputStream(((String) value).getBytes(StandardCharsets.UTF_8));
-              } else if (value instanceof InputStream) {
-                messageContentStream = (InputStream) value;
-              }
-            }
-            variables.put(name, value);
-            return true;
-          }
-
-          @Mock()
-          public boolean removeVariable(final String name) {
-            if (verbose) System.out.printf("removeVariable(%s)\n", name);
-            if (variables == null) {
-              variables = new HashMap();
-            }
-            if (variables.containsKey(name)) {
-              variables.remove(name);
-            }
-            return true;
-          }
-
-          @Mock()
-          public Message getMessage() {
-            return message;
-          }
-
-        }.getMockInstance();
-
-    exeCtxt = new MockUp<ExecutionContext>() {}.getMockInstance();
-
-    message =
-        new MockUp<Message>() {
-          @Mock()
-          public InputStream getContentAsStream() {
-            return messageContentStream;
-          }
-
-          @Mock()
-          public void setContent(InputStream is) {
-            // System.out.printf("\n** setContent(Stream)\n");
-            messageContentStream = is;
-          }
-
-          @Mock()
-          public void setContent(String content) {
-            // System.out.printf("\n** setContent(String)\n");
-            messageContentStream =
-                new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-          }
-
-          @Mock()
-          public String getContent() {
-            // System.out.printf("\n** getContent()\n");
-            try {
-              StringWriter writer = new StringWriter();
-              IOUtils.copy(messageContentStream, writer, StandardCharsets.UTF_8);
-              return writer.toString();
-            } catch (Exception ex1) {
-              return null;
-            }
-          }
-        }.getMockInstance();
-  }
+public class TestMultipartFormCreator extends TestBase {
 
   @Test
   public void create_Simple_SinglePart() throws Exception {
@@ -189,18 +62,7 @@ public class TestMultipartFormCreator {
     Assert.assertNotNull(output, "no output");
   }
 
-  private byte[] loadImageBytes(String filename) throws IOException {
-    Path path = Paths.get(testDataDir, filename);
-    if (!Files.exists(path)) {
-      throw new IOException("file(" + path.toString() + ") not found");
-    }
-    InputStream imageInputStream = Files.newInputStream(path);
-    byte[] imageBytes = IOUtils.toByteArray(imageInputStream);
-    return imageBytes;
-  }
-
-  private static void copyInputStreamToFile(InputStream inputStream, File file)
-    throws IOException {
+  private static void copyInputStreamToFile(InputStream inputStream, File file) throws IOException {
 
     Boolean wantAppend = false;
     try (FileOutputStream outputStream = new FileOutputStream(file, wantAppend)) {
@@ -234,7 +96,7 @@ public class TestMultipartFormCreator {
 
     Properties props = new Properties();
     props.put("descriptor", descriptorJson);
-    //props.put("destination", "destination");
+    // props.put("destination", "destination");
     props.put("debug", "true");
 
     MultipartFormCreator callout = new MultipartFormCreator(props);

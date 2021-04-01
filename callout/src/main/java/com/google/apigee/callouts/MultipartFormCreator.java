@@ -33,12 +33,10 @@ import java.util.Map;
 import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.MultipartForm;
 import org.jclouds.io.payloads.Part;
-//import com.google.gson.Gson;
 
 public class MultipartFormCreator extends CalloutBase implements Execution {
   private static final String varprefix = "mpf_";
   private static final boolean wantStringDefault = true;
-  //private static final Gson gson = new Gson();
 
   public MultipartFormCreator(Map properties) {
     super(properties);
