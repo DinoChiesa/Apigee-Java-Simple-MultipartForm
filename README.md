@@ -268,14 +268,32 @@ form.  If you have an upload which exceeds that limit the callout will fail.
 ## ContentSetter
 
 This callout will set a byte array into a message content.
-This callout may be useful after parsing a multipart form, if you want to set ONE of the parsed items into the message content of a message.
+It may be useful after parsing a multipart form, if you want to set ONE of the parsed items into the message content of a different message.
+
+Normally you would use the Apigee `AssignMessage` policy to do this, like so:
+```
+<AssignMessage name="AM-Response">
+    <AssignVariable>
+        <Name>response.content</Name>
+        <Ref>mpf_item_content_1</Ref>
+    </AssignVariable>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+</AssignMessage>
+```
+
+...which says to use the output of a prior "parse" callout as the full content for this response message.
+
+But AssignMessage seems to treat the referenced variable as a string, so the result is that the response.content gets a string like "[B@1cf582a1". Not helpful.
+
+This callout avoids that pitfall.
 
 It accepts two properties as input:
 
 | property name   | description                                                                                  |
 | ----------------| -------------------------------------------------------------------------------------------- |
 | **destination** | optional, a string, the name of a message. If it does not exist, it will be created. Defaults to 'message'.          |
-| **contentVar**  | required\*. the name of a context variable, which contains a byte array or string.  |
+| **contentVar**  | required. the name of a context variable, which contains a byte array or string.  |
+| **contentType** | optional. the value to set into the content-type header of the message. Default: don't set a content-type header.  |
 
 Example:
 
@@ -284,11 +302,13 @@ Example:
   <Properties>
     <Property name="destination">message</Property>
     <Property name="contentVar">mpf_item_content_1</Property>
+    <Property name="contentType">{mpf_item_content-type_1</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.ContentSetter</ClassName>
   <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
 </JavaCallout>
 ```
+
 
 
 ## Example API Proxy
@@ -366,4 +386,4 @@ and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java 
 ## Bugs
 
 * The automated tests are pretty thin.
-* There is no way to adjust the size limit for the uploaded files. 
+* There is no way to adjust the size limit for the uploaded files.
