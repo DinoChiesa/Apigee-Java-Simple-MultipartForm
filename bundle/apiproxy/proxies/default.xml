@@ -129,6 +129,32 @@
     </Flow>
 
 
+    <Flow name='test parse 2'>
+      <Description>Parse a multi-part form in the inbound message, reply with the bytes of the 2nd part</Description>
+      <!--
+          Example invocation:
+
+       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/parse-2
+
+      -->
+      <Request>
+        <Step>
+          <Name>Java-ParseMultipartForm-1</Name>
+        </Step>
+      </Request>
+
+      <Response>
+        <Step>
+          <Name>AM-Response-2</Name>
+        </Step>
+        <Step>
+          <Name>Java-SetResponseContent</Name>
+        </Step>
+      </Response>
+      <Condition>(proxy.pathsuffix MatchesPath "/parse-2") and (request.verb = "POST")</Condition>
+    </Flow>
+
+
     <Flow name='unknown request'>
       <Request>
         <Step><Name>RF-UnknownRequest</Name></Step>
