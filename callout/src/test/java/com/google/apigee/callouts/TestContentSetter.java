@@ -34,6 +34,7 @@ public class TestContentSetter extends TestBase {
     props.put("contentVar", "imageData");
     // props.put("destination", "message");
     props.put("contentType", "image/png");
+    props.put("fileName", "Logs_512px.png");
 
     ContentSetter callout = new ContentSetter(props);
 

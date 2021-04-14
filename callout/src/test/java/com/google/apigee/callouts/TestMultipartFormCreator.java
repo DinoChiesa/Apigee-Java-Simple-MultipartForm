@@ -39,6 +39,7 @@ public class TestMultipartFormCreator extends TestBase {
     props.put("want-decode", "true");
     props.put("contentType", "image/png");
     props.put("part-name", "image");
+    props.put("fileName", "Logs_512px.png");
     // props.put("outputVar", outputVar);
 
     MultipartFormCreator callout = new MultipartFormCreator(props);
@@ -86,7 +87,8 @@ public class TestMultipartFormCreator extends TestBase {
             + "  \"part2.png\" : {\n"
             + "    \"content-var\" :  \"imageBytes\",\n"
             + "    \"content-type\" : \"image/png\",\n"
-            + "    \"want-b64-decode\": false\n"
+            + "    \"want-b64-decode\": false,\n"
+            + "    \"file-name\": \"Logs_512px.png\"\n"
             + "  }\n"
             + "}\n";
 
