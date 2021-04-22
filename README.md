@@ -22,8 +22,8 @@ maven.
 
 
 1. copy the jar file, available in
-   target/apigee-multipart-form-20210401.jar , if you have built the
-   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210401.jar)
+   target/apigee-multipart-form-20210414.jar , if you have built the
+   jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210414.jar)
    if you have not, to your apiproxy/resources/java directory. You can
    do this offline, or using the graphical Proxy Editor in the Apigee
    Edge Admin Portal.
@@ -36,7 +36,7 @@ maven.
     <JavaCallout name='Java-Multipart-Form-1'>
         ...
       <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-      <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+      <ResourceURL>java://apigee-multipart-form-20210414.jar</ResourceURL>
     </JavaCallout>
    ```
 
@@ -90,13 +90,14 @@ An example for creating a form:
       "part2.png" : {
         "content-var" :  "image-bytes",
         "content-type" : "image/png",
-        "want-b64-decode": false
+        "want-b64-decode": false,
+        "file-name": "part2.png"
       }
     }
     </Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210414.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -125,7 +126,7 @@ Content-Type: application/xml
 </root>
 
 ----------------------G70E38XDL4FRMV
-Content-Disposition: form-data; name="part2.png"
+Content-Disposition: form-data; name="part2.png"; filename="part2.png"
 Content-Type: image/png
 
 PNG
@@ -177,6 +178,7 @@ other properties:
 | **contentVar**         | required | name of a variable containing a string which represents a base64-encoded byte array |
 | **contentType**        | required | a string, something like `image/png` or `application/json` etc                      |
 | **part-name**          | required | a string, the name of the part within the form.                                     |
+| **fileName**          | optional | a string, the file name of the part within the form.                                     |
 | **want-base64-decode** | optional | true or false. Whether to decode the contentVar before embedding the content into the form. If not present, assumed false.                     |
 | **destination**        | optional | a string, the name of a message. If it does not exist, it will be created. Defaults to 'message'.          |
 
@@ -190,9 +192,10 @@ An example for creating a form:
     <Property name="contentType">image/png</Property>
     <Property name="want-base64-decode">true</Property>
     <Property name="part-name">image</Property>
+    <Property name="fileName">image-file.png</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormCreator</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210414.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -203,7 +206,7 @@ The result will be a form, that looks like so:
 
 ```
 --------------------9WTvUeO4O5
-Content-Disposition: form-data; name="image"
+Content-Disposition: form-data; name="image"; filename="image-file.png"
 Content-Type: image/png
 
 PNG
@@ -232,7 +235,7 @@ An example for parsing a form:
     <Property name="source">message</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.MultipartFormParser</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210414.jar</ResourceURL>
 </JavaCallout>
 ```
 
@@ -305,7 +308,7 @@ Example:
     <Property name="contentType">{mpf_item_content-type_1</Property>
   </Properties>
   <ClassName>com.google.apigee.callouts.ContentSetter</ClassName>
-  <ResourceURL>java://apigee-multipart-form-20210401.jar</ResourceURL>
+  <ResourceURL>java://apigee-multipart-form-20210414.jar</ResourceURL>
 </JavaCallout>
 ```
 

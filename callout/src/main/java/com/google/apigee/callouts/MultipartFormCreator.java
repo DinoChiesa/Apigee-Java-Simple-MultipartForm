@@ -74,6 +74,10 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
     return getSimpleRequiredProperty("contentType", msgCtxt);
   }
 
+  private String getPartFileName(MessageContext msgCtxt) throws Exception {
+    return getSimpleOptionalProperty("fileName", msgCtxt);
+  }
+
   private String getPartName(MessageContext msgCtxt) throws Exception {
     return getSimpleRequiredProperty("part-name", msgCtxt);
   }
@@ -104,11 +108,17 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
       }
       msgCtxt.setVariable(varName("boundary"), boundary);
       message.setHeader("content-type", "multipart/form-data;boundary=" + boundary);
+
+      Part.PartOptions partOptions = new Part.PartOptions();
+      partOptions.contentType(getPartContentType(msgCtxt));
+      if (getPartFileName(msgCtxt) != null) {
+        partOptions.filename(getPartFileName(msgCtxt));
+      }
       Part filepart =
           Part.create(
               getPartName(msgCtxt),
               new ByteArrayPayload((byte[]) contentBytes),
-              new Part.PartOptions().contentType(getPartContentType(msgCtxt)));
+              partOptions);
 
       MultipartForm mpf = new MultipartForm(boundary, new Part[] {filepart});
       byte[] payload = streamToByteArray(mpf.openStream());
@@ -186,6 +196,9 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
 
         Part.PartOptions partOptions =
           new Part.PartOptions().contentType((String) partDefinition.get("content-type"));
+        if (partDefinition.get("file-name") != null && !partDefinition.get("file-name").equals("")) {
+          partOptions.filename((String) partDefinition.get("file-name"));
+        }
 
         if (partDefinition.get("transfer-encoding") != null) {
           partOptions.transferEncoding((String) partDefinition.get("transfer-encoding"));
