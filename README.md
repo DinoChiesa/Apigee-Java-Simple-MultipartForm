@@ -1,7 +1,8 @@
 # Apigee Multipart Form Callout
 
-This directory contains the Java source code and pom.xml file required to build a Java callout for Apigee that
-creates a multipart form payload, from a single blob, or parses an inbound multipart form payload.
+This directory contains the Java source code and pom.xml file required to build
+a Java callout for Apigee that creates a multipart form payload, from a single
+blob, or parses an inbound multipart form payload.
 
 For creating the multipart form, it relies on Apache-licensed code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
 For parsing, it relies on Apache-licensed code lifted from [javadelight](https://github.com/javadelight/delight-fileupload). I didn't use the entire libraries for either of these things, because they drag in too many un-desired dependencies.
@@ -19,7 +20,6 @@ configuration for the policy.  If you want to build it, feel free.  The
 instructions are at the bottom of this readme. Even without
 instructions, you should be able to figure it out if you know and use
 maven.
-
 
 1. copy the jar file, available in
    target/apigee-multipart-form-20210414.jar , if you have built the
@@ -369,7 +369,9 @@ Building from source requires Java 1.8, and Maven.
 
 1. unpack (if you can read this, you've already done that).
 
-2. Before building _the first time_, configure the build on your machine by loading the Apigee jars into your local cache:
+2. Before building _the first time_, configure the build on your machine by
+   loading the Apigee jars into your local cache:
+
   ```
   ./buildsetup.sh
   ```
@@ -378,13 +380,16 @@ Building from source requires Java 1.8, and Maven.
   ```
   mvn clean package
   ```
-  This will build the jar and also run all the tests, and copy the jar to the resource directory in the sample apiproxy bundle.
+
+  This will build the jar and also run all the tests, and copy the jar to the
+  resource directory in the sample apiproxy bundle.
 
 
 ## License
 
-This material is Copyright 2018-2021 Google LLC.
-and is licensed under the [Apache 2.0 License](LICENSE). This includes the Java code as well as the API Proxy configuration.
+This material is Copyright 2018-2021 Google LLC.  and is licensed under the
+[Apache 2.0 License](LICENSE). This includes the Java code as well as the API
+Proxy configuration.
 
 ## Bugs
 
