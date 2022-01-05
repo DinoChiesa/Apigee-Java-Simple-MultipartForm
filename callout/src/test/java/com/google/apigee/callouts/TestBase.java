@@ -1,4 +1,4 @@
-// Copyright 2016 Apigee Corp, 2017-2021 Google LLC.
+// Copyright 2016 Apigee Corp, 2017-2022 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,16 +48,16 @@ public abstract class TestBase {
 
     msgCtxt =
         new MockUp<MessageContext>() {
-          private Map variables;
+          private Map<String, Object> variables;
 
           public void $init() {
-            variables = new HashMap();
+            variables = new HashMap<String, Object>();
           }
 
           @Mock()
-          public <T> T getVariable(final String name) {
+          public Object getVariable(final String name) {
             if (variables == null) {
-              variables = new HashMap();
+              variables = new HashMap<String, Object>();
             }
             // T value = null;
             // if (name.equals("message")) {
@@ -71,9 +71,9 @@ public abstract class TestBase {
             // return value;
 
             if (name.equals("message")) {
-              return (T) message;
+              return message;
             }
-            return (T) variables.get(name);
+            return variables.get(name);
           }
 
           @Mock()
@@ -82,7 +82,7 @@ public abstract class TestBase {
               System.out.printf(
                   "setVariable(%s) <= %s\n", name, (value != null) ? value : "(null)");
             if (variables == null) {
-              variables = new HashMap();
+              variables = new HashMap<String, Object>();
             }
             if (name.equals("message.content")) {
               if (value instanceof String) {
@@ -100,7 +100,7 @@ public abstract class TestBase {
           public boolean removeVariable(final String name) {
             if (verbose) System.out.printf("removeVariable(%s)\n", name);
             if (variables == null) {
-              variables = new HashMap();
+              variables = new HashMap<String, Object>();
             }
             if (variables.containsKey(name)) {
               variables.remove(name);
@@ -159,5 +159,4 @@ public abstract class TestBase {
     byte[] imageBytes = IOUtils.toByteArray(imageInputStream);
     return imageBytes;
   }
-
 }

@@ -1,6 +1,4 @@
-// MultipartFormCreator.java
-//
-// Copyright (c) 2018-2021 Google LLC.
+// Copyright (c) 2018-2022 Google LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -149,6 +147,7 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
       }
 
       boolean mustSetDestination = false;
+      @SuppressWarnings("unchecked")
       Map<String, Object> map = JavaxJson.fromJson(descriptor, Map.class);
       //Map<String, Object> map = gson.fromJson(new StringReader(), Map.class);
       // eg
@@ -180,6 +179,7 @@ public class MultipartFormCreator extends CalloutBase implements Execution {
       List<Part> parts = new ArrayList<Part>();
       for (Map.Entry<String, Object> entry : map.entrySet()) {
         String partName = entry.getKey();
+        @SuppressWarnings("unchecked")
         Map<String, Object> partDefinition = (Map<String, Object>) entry.getValue();
 
         Object partContent = msgCtxt.getVariable((String) partDefinition.get("content-var"));
