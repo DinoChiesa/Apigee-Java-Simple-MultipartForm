@@ -1,4 +1,4 @@
-<ProxyEndpoint name='default'>
+<ProxyEndpoint name="default">
   <Description>Proxy for Java callout MultipartForm</Description>
   <HTTPProxyConnection>
     <BasePath>/multipart-form</BasePath>
@@ -7,32 +7,40 @@
   </HTTPProxyConnection>
 
   <FaultRules/>
+  <DefaultFaultRule>
+    <AlwaysEnforce>true</AlwaysEnforce>
+    <Step>
+      <Name>AM-Inject-Proxy-Revision-Header</Name>
+    </Step>
+  </DefaultFaultRule>
 
-  <PreFlow name='PreFlow'>
-      <Request/>
-      <Response>
-        <Step><Name>AM-CleanResponseHeaders</Name></Step>
-      </Response>
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response>
+      <Step>
+        <Name>AM-Clean-Request-Headers-From-Response</Name>
+      </Step>
+    </Response>
   </PreFlow>
-  <PostFlow name='PostFlow'>
-      <Request/>
-      <Response>
-      </Response>
+
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response>
+      <Step>
+        <Name>AM-Inject-Proxy-Revision-Header</Name>
+      </Step>
+    </Response>
   </PostFlow>
-  <PostClientFlow name='PostFlow'>
-      <Request/>
-      <Response>
-      </Response>
+
+  <PostClientFlow name="PostFlow">
+    <Request/>
+    <Response>
+    </Response>
   </PostClientFlow>
 
   <Flows>
-    <Flow name='test create a multi-part form with multiple parts'>
+    <Flow name="test create a multi-part form with multiple parts">
       <Description>Create a multi-part form in a new message</Description>
-      <!--
-          Example invocation:
-
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-multi
-      -->
       <Request>
         <Step>
           <Name>AV-TextFileData</Name>
@@ -56,15 +64,8 @@
       <Condition>(proxy.pathsuffix MatchesPath "/create-multi") and (request.verb = "POST")</Condition>
     </Flow>
 
-
-    <Flow name='test create 1'>
+    <Flow name="test create 1">
       <Description>Create a multi-part form with a single part</Description>
-      <!--
-          Example invocation:
-
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-1a
-
-      -->
       <Request>
         <Step>
           <Name>AV-ImageData</Name>
@@ -79,13 +80,8 @@
       <Condition>(proxy.pathsuffix MatchesPath "/create-1a") and (request.verb = "POST")</Condition>
     </Flow>
 
-    <Flow name='test create 2'>
+    <Flow name="test create 2">
       <Description>Create a multi-part form with a signle part, in a new message</Description>
-      <!--
-          Example invocation:
-
-       curl -i -X POST -d '' https://${ORG}-${ENV}.apigee.net/multipart-form/create-1b
-      -->
       <Request>
         <Step>
           <Name>AV-TextFileData</Name>
@@ -106,14 +102,8 @@
       <Condition>(proxy.pathsuffix MatchesPath "/create-1b") and (request.verb = "POST")</Condition>
     </Flow>
 
-    <Flow name='test parse 1'>
+    <Flow name="test parse 1">
       <Description>Parse a multi-part form in the inbound message</Description>
-      <!--
-          Example invocation:
-
-       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/parse-1
-
-      -->
       <Request>
         <Step>
           <Name>Java-ParseMultipartForm-1</Name>
@@ -128,15 +118,8 @@
       <Condition>(proxy.pathsuffix MatchesPath "/parse-1") and (request.verb = "POST")</Condition>
     </Flow>
 
-
-    <Flow name='test parse 2'>
+    <Flow name="test parse 2">
       <Description>Parse a multi-part form in the inbound message, reply with the bytes of the 2nd part</Description>
-      <!--
-          Example invocation:
-
-       curl -i  -F readme=@README.md  https://${ORG}-${ENV}.apigee.net/multipart-form/parse-2
-
-      -->
       <Request>
         <Step>
           <Name>Java-ParseMultipartForm-1</Name>
@@ -154,21 +137,22 @@
       <Condition>(proxy.pathsuffix MatchesPath "/parse-2") and (request.verb = "POST")</Condition>
     </Flow>
 
-
-    <Flow name='unknown request'>
+    <Flow name="unknown request">
       <Request>
-        <Step><Name>RF-UnknownRequest</Name></Step>
+        <Step>
+          <Name>RF-UnknownRequest</Name>
+        </Step>
       </Request>
       <Response/>
     </Flow>
 
   </Flows>
 
-  <RouteRule name='InvokeRouteRule'>
+  <RouteRule name="InvokeRouteRule">
     <TargetEndpoint>default</TargetEndpoint>
     <Condition>proxy.pathsuffix MatchesPath "/none"</Condition>
   </RouteRule>
 
-  <RouteRule name='Loopback'/>
+  <RouteRule name="Loopback"/>
 
 </ProxyEndpoint>

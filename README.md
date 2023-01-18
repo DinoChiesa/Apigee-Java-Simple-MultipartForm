@@ -1,11 +1,24 @@
 # Apigee Multipart Form Callout
 
 This directory contains the Java source code and pom.xml file required to build
-a Java callout for Apigee that creates a multipart form payload, from a single
-blob, or parses an inbound multipart form payload.
+a Java callout for Apigee that creates or parses a payload with MIME-type `multipart/form-data`,
+as defined by  [IETF RFC
+7578](https://www.rfc-editor.org/rfc/rfc7578).
 
-For creating the multipart form, it relies on Apache-licensed code lifted from [Apache jclouds](https://github.com/jclouds/jclouds).
-For parsing, it relies on Apache-licensed code lifted from [javadelight](https://github.com/javadelight/delight-fileupload). I didn't use the entire libraries for either of these things, because they drag in too many un-desired dependencies.
+
+For creating the multipart form, it relies on Apache-licensed code lifted from
+[Apache jclouds](https://github.com/jclouds/jclouds).  For parsing, it relies on
+Apache-licensed code lifted from
+[javadelight](https://github.com/javadelight/delight-fileupload). I didn't use
+the entire libraries for either of these things, because they drag in too many
+un-desired and unneeded dependencies.
+
+Even so, these dependencies do bring in some others (Guava, Servlet), and
+because of that this implementation is less than optimal.  I created a newer
+implementation available at
+[Apigee-Java-MultipartForm-V2](https://github.com/DinoChiesa/Apigee-Java-MultipartForm-V2),
+to avoid these dependencies. I think it's better. You may want to check it out.
+
 
 ## Disclaimer
 
@@ -15,7 +28,7 @@ This example is not an official Google product, nor is it part of an official Go
 ## Using this policy
 
 You do not need to build the source code in order to use the policy in
-Apigee Edge.  All you need is the built JAR, and the appropriate
+Apigee.  All you need is the built JAR, and the appropriate
 configuration for the policy.  If you want to build it, feel free.  The
 instructions are at the bottom of this readme. Even without
 instructions, you should be able to figure it out if you know and use
@@ -26,7 +39,7 @@ maven.
    jar, or in [the repo](bundle/apiproxy/resources/java/apigee-multipart-form-20210414.jar)
    if you have not, to your apiproxy/resources/java directory. You can
    do this offline, or using the graphical Proxy Editor in the Apigee
-   Edge Admin Portal.
+   Admin UI.
 
 2. include an XML file for the Java callout policy in your
    apiproxy/resources/policies directory. It should look
@@ -40,16 +53,20 @@ maven.
     </JavaCallout>
    ```
 
-3. use the Edge UI, or a command-line tool like
+3. use the Apigee UI, or a command-line tool like
    [importAndDeploy.js](https://github.com/DinoChiesa/apigee-edge-js/blob/master/examples/importAndDeploy.js) or
    [apigeetool](https://github.com/apigee/apigeetool-node)
    or similar to
-   import your proxy into an Edge organization, and then deploy the proxy .
-   Eg, `./importAndDeploy.js -n -v -o ${ORG} -e ${ENV} -d bundle/`
+   import your proxy into an Apigee organization, and then deploy the proxy .
+   Eg, `./importAndDeploy.js --token $TOKEN -v -o $ORG -e $ENV -d bundle/`
 
 4. Use a client to generate and send http requests to the proxy you just deployed . Eg,
    ```
-   curl -i https://$ORG-$ENV.apigee.net/myproxy/foo
+   # Apigee Edge
+   endpoint=https://$ORG-$ENV.apigee.net
+   # Apigee X/hybrid
+   endpoint=https://my-custom-endpoint.net
+   curl -i -X POST -d '' $endpoint/multipart-form/create-multi
    ```
 
 
